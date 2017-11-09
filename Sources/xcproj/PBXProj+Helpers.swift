@@ -111,6 +111,20 @@ extension PBXProj {
         }
     }
 
+    /// Infers project name from Path and sets it as project name
+    ///
+    /// Project name is needed for certain comments when serialising PBXProj
+    ///
+    /// - Parameters:
+    ///   - path: path to .xcodeproj directory.
+    func updateProjectName(path: Path) {
+        if let projectName = path.projectName() {
+            let rootObjectReference = rootObject
+            let rootProject = projects.first(where: { $0.reference == rootObjectReference })
+            rootProject?.name = projectName
+        }
+    }
+
 }
 
 // MARK: - PBXProj extension (Writable)
@@ -118,6 +132,7 @@ extension PBXProj {
 extension PBXProj: Writable {
     
     public func write(path: Path, override: Bool) throws {
+        updateProjectName(path: path)
         let encoder = PBXProjEncoder()
         let output = encoder.encode(proj: self)
         if override && path.exists {
