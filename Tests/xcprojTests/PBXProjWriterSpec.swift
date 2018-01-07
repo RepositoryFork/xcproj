@@ -38,7 +38,6 @@ class PBXProjEncoderSpec: XCTestCase {
         let escapedNewline = "\\n"
         let escapedQuote = "\\\""
         let escapedEscape = "\\\\"
-        let escapedTab = "\\t"
 
         let values: [String: String] = [
             "a": "a",
@@ -58,7 +57,7 @@ class PBXProjEncoderSpec: XCTestCase {
             "=": "=".quoted,
             ",": ",".quoted,
             " ": " ".quoted,
-            "\t": escapedTab.quoted,
+            "\t": "\t".quoted,
             "a;": "a;".quoted,
             "a_a": "a_a",
             "a a": "a a".quoted,
@@ -66,11 +65,11 @@ class PBXProjEncoderSpec: XCTestCase {
             "a\(quote)q\(quote)a": "a\(escapedQuote)q\(escapedQuote)a".quoted,
             "a\(quote)q\(quote)a".quoted: "\(escapedQuote)a\(escapedQuote)q\(escapedQuote)a\(escapedQuote)".quoted,
             "a\(escapedQuote)a\(escapedQuote)": "a\(escapedEscape)\(escapedQuote)a\(escapedEscape)\(escapedQuote)".quoted,
-            "a\na": "a\\na".quoted,
-            "\n": escapedNewline.quoted,
-            "\na": "\(escapedNewline)a".quoted,
-            "a\n": "a\(escapedNewline)".quoted,
-            "a\na".quoted: "\(escapedQuote)a\(escapedNewline)a\(escapedQuote)".quoted,
+            "a\na": "a\na".quoted,
+            "\n": "\n".quoted,
+            "\na": "\na".quoted,
+            "a\n": "a\n".quoted,
+            "a\na".quoted: "\(escapedQuote)a\na\(escapedQuote)".quoted,
             "a\(escapedNewline)a": "a\(escapedEscape)na".quoted,
             "a\(escapedNewline)a".quoted: "\(escapedQuote)a\(escapedEscape)na\(escapedQuote)".quoted,
             "\"": escapedQuote.quoted,
@@ -85,6 +84,24 @@ class PBXProjEncoderSpec: XCTestCase {
             if escapedString != expected {
                 XCTFail("Escaped strings are not equal:\ninitial: \(initial)\nexpect:  \(expected)\nescaped: \(escapedString) ")
             }
+        }
+
+        XCTAssertEqual(CommentedString("\t", specialFlag: true).validString, "\\t".quoted)
+        XCTAssertEqual(CommentedString("\n", specialFlag: true).validString, "\\n".quoted)
+    }
+
+    func testShellScriptEscaping() {
+        let buildPhase = PBXShellScriptBuildPhase(shellScript: """
+        \u{9}cd ..
+        \u{9}echo Hello world
+        """)
+        let proj = PBXProj(objectVersion: 1, rootObject: "", archiveVersion: 1)
+        let (_, value) = buildPhase.plistKeyAndValue(proj: proj, reference: "ref")
+
+        if let shellScriptString = value.dictionary?["shellScript"]?.string {
+            XCTAssertEqual(shellScriptString.validString, "\\tcd ..\\n\\techo Hello world".quoted)
+        } else {
+            XCTFail("Expected 'shellScript' string.")
         }
     }
 
