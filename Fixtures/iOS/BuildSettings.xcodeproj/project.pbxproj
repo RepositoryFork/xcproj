@@ -103,6 +103,7 @@
 				singleEscape = "\\";
 				unicode_scalar_codepoint_00 = "\U0000";
 				unicode_scalar_codepoint_01 = "$(inherited)";
+				unicode_scalar_codepoint_01_a_01 = "$(inherited) a\U0001";
 				unicode_scalar_codepoint_02 = "\U0002";
 				unicode_scalar_codepoint_03 = "\U0003";
 				unicode_scalar_codepoint_04 = "\U0004";

@@ -11,6 +11,9 @@ struct CommentedString {
 
     /// Tab and new line should be escaped for valid string
     let specialFlag: Bool
+
+    /// 0x1 should be replaced with "$(inherited)"
+    let specialFlag2: Bool
     
     /// Initializes the commented string with the value and the comment.
     ///
@@ -18,10 +21,12 @@ struct CommentedString {
     ///   - string: string value.
     ///   - comment: comment.
     ///   - specialFlag: tab and new line should be escaped for valid string
-    init(_ string: String, comment: String? = nil, specialFlag: Bool = false) {
+    ///   - specialFlag2: 0x1 should be replaced with "$(inherited)"
+    init(_ string: String, comment: String? = nil, specialFlag: Bool = false, specialFlag2: Bool = false) {
         self.string = string
         self.comment = comment
         self.specialFlag = specialFlag
+        self.specialFlag2 = specialFlag2
     }
 
     private static var invalidCharacters: CharacterSet = {
@@ -45,7 +50,7 @@ struct CommentedString {
 
         let replacements: [Character: String] = [
             "\u{0}": "\\U0000",
-            "\u{1}": "$(inherited)",
+            "\u{1}": specialFlag2 ? "$(inherited)" : "\\U0001",
             "\u{2}": "\\U0002",
             "\u{3}": "\\U0003",
             "\u{4}": "\\U0004",
